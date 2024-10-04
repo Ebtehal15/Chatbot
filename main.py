@@ -1,19 +1,12 @@
 import streamlit as st
-from streamlit_chat import message
 from dotenv import load_dotenv
 import os
-
-from langchain_community.chat_models import ChatOpenAI
-
-from langchain.schema import (
-    SystemMessage,
-    HumanMessage,
-    AIMessage
-)
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 def init():
     load_dotenv()
-    # Load the OpenAI API key from the environment variable
+    # Load the OpenAI API key from Streamlit secrets or environment variable
     if os.getenv("OPENAI_API_KEY") is None or os.getenv("OPENAI_API_KEY") == "":
         print("OPENAI_API_KEY is not set")
         exit(1)
@@ -21,41 +14,44 @@ def init():
         print("OPENAI_API_KEY is set")
 
     st.set_page_config(
-        page_title="Chat with Me",
+        page_title="Chatbot",
         page_icon="🤖"
     )
 
 def main():
     init()
 
-    chat = ChatOpenAI(temperature=0)
+    # Set up the OpenAI client
+    client = ChatOpenAI(temperature=0)
 
-    # Initialize messages if not present
+    # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = [
-            SystemMessage(content="You are a helpful assistant."),
+            SystemMessage(content="You are a helpful assistant.you can just write up to 5 lines")
         ]
 
-    st.header("istediginiz soruyu sorabilirisiniz 🤖")
-    with st.sidebar:
-        user_input = st.text_input("Mesajınız:", key="user_input")
+    # Display chat messages from history
+    st.title("İstediğiniz soruyu sorabilirsiniz")
+    for message in st.session_state.messages[1:]:  # Skip the system message
+        with st.chat_message("user" if isinstance(message, HumanMessage) else "assistant"):
+            st.markdown(message.content)
 
-    if user_input:
-        st.session_state.messages.append(HumanMessage(content=user_input))
-        # Send the message history to our chat
-        with st.spinner("Düşünüyor"):
-            response = chat(st.session_state.messages)
+    # Accept user input
+    if prompt := st.chat_input("Ne sormak istersiniz?"):
+        # Add user message to chat history
+        st.session_state.messages.append(HumanMessage(content=prompt))
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-        # Correct the line below to use 'messages' instead of 'message'
-        st.session_state.messages.append(AIMessage(content=response.content))
+        # Generate assistant response
+        with st.chat_message("assistant"):
+            with st.spinner("Assistant yazıyor..."):
+                response = client(st.session_state.messages)
+                assistant_message = AIMessage(content=response.content)
+                st.markdown(assistant_message.content)
 
-    # Retrieve the messages from session state
-    messages = st.session_state.get('messages', [])
-    for i, msg in enumerate(messages[1:]):  # Start from 1 to skip the SystemMessage
-        if i % 2 == 0:
-            message(msg.content, is_user=True, key=str(i) + '_user')
-        else:
-            message(msg.content, is_user=False, key=str(i) + '_ai')
+        # Add assistant response to chat history
+        st.session_state.messages.append(assistant_message)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
