@@ -31,7 +31,7 @@ def main():
         ]
 
     # Display chat messages from history
-    st.title("İstediğiniz soruyu sorabilirsiniz")
+    st.title("İstediğiniz soruyu sorabilirsiniz 🤖")
     for message in st.session_state.messages[1:]:  # Skip the system message
         with st.chat_message("user" if isinstance(message, HumanMessage) else "assistant"):
             st.markdown(message.content)
