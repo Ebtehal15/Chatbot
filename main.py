@@ -38,7 +38,7 @@ def main():
 
     st.header("istediginiz soruyu sorabilirisiniz 🤖")
     with st.sidebar:
-        user_input = st.text_input("Your message:", key="user_input")
+        user_input = st.text_input("Mesajınız:", key="user_input")
 
     if user_input:
         st.session_state.messages.append(HumanMessage(content=user_input))
