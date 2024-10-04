@@ -45,7 +45,7 @@ def main():
 
         # Generate assistant response
         with st.chat_message("assistant"):
-            with st.spinner("Assistant yazıyor..."):
+            with st.spinner("Assistan yazıyor..."):
                 response = client(st.session_state.messages)
                 assistant_message = AIMessage(content=response.content)
                 st.markdown(assistant_message.content)
