@@ -4,6 +4,14 @@ import os
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
+# CSS for hiding Streamlit menu and footer
+hide_streamlit_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+"""
+
 def init():
     load_dotenv()
     # Load the OpenAI API key from Streamlit secrets or environment variable
@@ -18,6 +26,9 @@ def init():
         page_icon="🤖"
     )
 
+    # Apply the CSS to hide Streamlit's menu and footer
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 def main():
     init()
 
@@ -31,11 +42,11 @@ def main():
         ]
 
     # Display chat messages from history
-    st.title("İstediğiniz soruyu sorabilirsiniz 🤖")
+    st.title("İstediğiniz soruyu sorabilirsiniz 🤖 ")
     for message in st.session_state.messages[1:]:  # Skip the system message
         with st.chat_message("user" if isinstance(message, HumanMessage) else "assistant"):
             st.markdown(message.content)
-
+        
     # Accept user input
     if prompt := st.chat_input("Ne sormak istersiniz?"):
         # Add user message to chat history
@@ -45,7 +56,7 @@ def main():
 
         # Generate assistant response
         with st.chat_message("assistant"):
-            with st.spinner("Assistan yazıyor..."):
+            with st.spinner("Assistant yazıyor..."):
                 response = client(st.session_state.messages)
                 assistant_message = AIMessage(content=response.content)
                 st.markdown(assistant_message.content)
